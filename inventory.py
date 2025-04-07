@@ -3,13 +3,13 @@ import os
 import time
 import requests
 import base64
-from openai import OpenAI
-
-
+from openai import OpenAI, AsyncOpenAI
+openrouter_key = os.getenv("OPENROUTER_API_KEY")
+client = AsyncOpenAI(base_url="https://openrouter.ai/api/v1", api_key=openrouter_key)
 
 most_recent_timestamp = time.time()
 
-openai_client = OpenAI()
+
 
 last_few_frames = []
 last_few_messages = []
@@ -96,8 +96,8 @@ def observe():
 def extract_items(observation):
     ## send a call to openai to extract the items from the observation
     ## then save the items to a file
-    response = openai_client.chat.completions.create(
-        model="gpt-4o-mini",
+    response = client.chat.completions.create(
+        model="openrouter/auto",
         messages=[
             {
                 "role": "system",
@@ -131,7 +131,7 @@ def upload_images_to_openai(messages, images, prompt):
 
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {openai_client.api_key}",
+            "Authorization": f"Bearer {client.api_key}",
         }
         content = [{
             "type": "text",
@@ -146,7 +146,7 @@ def upload_images_to_openai(messages, images, prompt):
             })
 
         payload = {
-            "model": "gpt-4o-mini",
+            "model": "openrouter/auto",
             "messages": last_few_messages + [
                 {
                     "role": "user",
@@ -156,8 +156,9 @@ def upload_images_to_openai(messages, images, prompt):
             "max_tokens": 300
         }
 
-        response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+        response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload)
         response_json = response.json()
+        print(response_json)
         ## return only the text
         messages.append({
             "role": "assistant",
