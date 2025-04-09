@@ -11,7 +11,7 @@ openai_client = AsyncOpenAI(base_url="https://openrouter.ai/api/v1", api_key=ope
 
 
 async def run(mcp_server: MCPServer):
-    frames = capture_frames_from_stream()
+    # frames = capture_frames_from_stream()
     frame = get_camera_frame()  
     items_extracted = upload_images_to_openai([],[frame],"Please make a list of all objects in the image capture.")
     agent = Agent(
